@@ -1,15 +1,16 @@
+import os
 from datetime import datetime
 
-name = input("Enter your name: ")
+# Get values from environment (Jenkins / Docker)
+name = os.getenv("NAME", "Guest")
+dob_input = os.getenv("DOB", "2000-01-01")
 
-# Safe DOB input
-while True:
-    dob_input = input("Enter your Date of Birth (YYYY-MM-DD): ")
-    try:
-        dob = datetime.strptime(dob_input, "%Y-%m-%d")
-        break
-    except ValueError:
-        print("❌ Wrong format! Example: 1998-07-23")
+# Convert DOB
+try:
+    dob = datetime.strptime(dob_input, "%Y-%m-%d")
+except ValueError:
+    print("❌ Wrong DOB format! Use YYYY-MM-DD")
+    exit()
 
 now = datetime.now()
 
