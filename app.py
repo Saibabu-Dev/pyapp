@@ -1,7 +1,11 @@
 import os
 from datetime import datetime, timedelta
 
-# -------- NAME INPUT (with validation) --------
+# -------- IST TIME --------
+def get_ist_now():
+    return datetime.utcnow() + timedelta(hours=5, minutes=30)
+
+# -------- INPUT (ENV or USER) --------
 while True:
     name = os.getenv("NAME")
 
@@ -14,7 +18,6 @@ while True:
         print("❌ Name cannot be empty!")
         name = None
 
-# -------- DOB INPUT --------
 while True:
     dob_input = os.getenv("DOB")
 
@@ -23,10 +26,9 @@ while True:
 
     try:
         dob = datetime.strptime(dob_input, "%Y-%m-%d")
+        now = get_ist_now()
 
-        # Future date check
-        now_check = datetime.utcnow() + timedelta(hours=5, minutes=30)
-        if dob > now_check:
+        if dob > now:
             print("❌ DOB cannot be in future!")
             dob_input = None
             continue
@@ -37,27 +39,44 @@ while True:
         print("❌ Wrong format! Example: 1998-07-23")
         dob_input = None
 
-# -------- CURRENT TIME (IST) --------
-now_utc = datetime.utcnow()
-now = now_utc + timedelta(hours=5, minutes=30)  # IST
-
+# -------- CURRENT TIME --------
+now = get_ist_now()
 current_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
-# -------- AGE CALCULATION --------
+# -------- TOTAL DIFFERENCE --------
 diff = now - dob
 
-days = diff.days
-seconds = diff.seconds
+total_days = diff.days
+total_seconds = diff.total_seconds()
 
-years = days // 365
-months = (days % 365) // 30
-remaining_days = (days % 365) % 30
+# -------- AGE BREAKDOWN --------
+years = now.year - dob.year
+months = now.month - dob.month
+days = now.day - dob.day
 
-weeks = days // 7
+if days < 0:
+    months -= 1
+    prev_month = (now.month - 1) if now.month > 1 else 12
+    prev_year = now.year if now.month > 1 else now.year - 1
+    days += (datetime(prev_year, prev_month % 12 + 1, 1) - datetime(prev_year, prev_month, 1)).days
 
-hours = seconds // 3600
-minutes = (seconds % 3600) // 60
-seconds = seconds % 60
+if months < 0:
+    years -= 1
+    months += 12
+
+weeks = total_days // 7
+
+# -------- TIME BREAKDOWN --------
+hours = int(total_seconds // 3600)
+minutes = int((total_seconds % 3600) // 60)
+seconds = int(total_seconds % 60)
+milliseconds = int((total_seconds - int(total_seconds)) * 1000)
+
+# -------- LEAP YEAR COUNT --------
+leap_years = 0
+for year in range(dob.year, now.year + 1):
+    if (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0):
+        leap_years += 1
 
 # -------- DAY OF BIRTH --------
 birth_day = dob.strftime("%A")
@@ -72,76 +91,28 @@ else:
 
 days_left = (next_bday - now).days
 
-# -------- ZODIAC --------
-month = dob.month
-day = dob.day
-
-if (month == 3 and day >= 21) or (month == 4 and day <= 19):
-    sign = "Aries 🔥"
-elif (month == 4 and day >= 20) or (month == 5 and day <= 20):
-    sign = "Taurus 🐂"
-elif (month == 5 and day >= 21) or (month == 6 and day <= 20):
-    sign = "Gemini 👬"
-elif (month == 6 and day >= 21) or (month == 7 and day <= 22):
-    sign = "Cancer 🦀"
-elif (month == 7 and day >= 23) or (month == 8 and day <= 22):
-    sign = "Leo 🦁"
-elif (month == 8 and day >= 23) or (month == 9 and day <= 22):
-    sign = "Virgo 🌾"
-elif (month == 9 and day >= 23) or (month == 10 and day <= 22):
-    sign = "Libra ⚖️"
-elif (month == 10 and day >= 23) or (month == 11 and day <= 21):
-    sign = "Scorpio 🦂"
-elif (month == 11 and day >= 22) or (month == 12 and day <= 21):
-    sign = "Sagittarius 🏹"
-elif (month == 12 and day >= 22) or (month == 1 and day <= 19):
-    sign = "Capricorn 🐐"
-elif (month == 1 and day >= 20) or (month == 2 and day <= 18):
-    sign = "Aquarius 🌊"
-else:
-    sign = "Pisces 🐟"
-
 # -------- OUTPUT --------
-print("\n" + "="*40)
+print("\n" + "="*45)
 print(f"Hello {name} 👋")
-print("="*40)
+print("="*45)
 
-print(f"🕒 Current Date & Time (IST): {current_time}")
+print(f"🕒 Current IST Time: {current_time}")
 print(f"🎂 Born on: {birth_day}")
-print(f"📅 Total Days: {days}")
-print(f"📆 Weeks: {weeks}")
 
-print("\n🧠 Age Details:")
-print(f"{years} Years, {months} Months, {remaining_days} Days")
-print(f"{hours} Hours, {minutes} Minutes, {seconds} Seconds")
+print("\n📊 Total Life Stats:")
+print(f"Days: {total_days}")
+print(f"Weeks: {weeks}")
 
-print(f"\n🎉 Next Birthday in: {days_left} days")
-print(f"\n🔮 Zodiac Sign: {sign}")
+print("\n🧠 Exact Age:")
+print(f"{years} Years, {months} Months, {days} Days")
 
-# -------- JAATHAKAM --------
-if sign == "Aries 🔥":
-    print("Bold leader, high energy 🔥")
-elif sign == "Taurus 🐂":
-    print("Strong mindset, money-focused 💰")
-elif sign == "Gemini 👬":
-    print("Smart, talkative, fast learner 🧠")
-elif sign == "Cancer 🦀":
-    print("Emotional, caring ❤️")
-elif sign == "Leo 🦁":
-    print("Natural leader, confident 👑")
-elif sign == "Virgo 🌾":
-    print("Perfectionist, practical ✔️")
-elif sign == "Libra ⚖️":
-    print("Balanced and peaceful ⚖️")
-elif sign == "Scorpio 🦂":
-    print("Powerful and intense 💥")
-elif sign == "Sagittarius 🏹":
-    print("Loves freedom & travel ✈️")
-elif sign == "Capricorn 🐐":
-    print("Disciplined and goal-oriented 🎯")
-elif sign == "Aquarius 🌊":
-    print("Innovative thinker ⚡")
-else:
-    print("Creative and dreamy 🌙")
+print("\n⏱ Total Time Lived:")
+print(f"{hours} Hours")
+print(f"{minutes} Minutes")
+print(f"{seconds} Seconds")
+print(f"{milliseconds} Milliseconds")
 
-print("="*40)
+print(f"\n🗓 Leap Years crossed: {leap_years}")
+print(f"🎉 Next Birthday in: {days_left} days")
+
+print("="*45)
