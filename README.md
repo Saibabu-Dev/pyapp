@@ -8,7 +8,7 @@ This project is a simple 2-tier application built using Docker.
 - Docker containers
 - Docker networking
 
-The application fetches data from MySQL database and displays it in a browser.
+👉 The application fetches data from MySQL database and displays it in a browser.
 
 ---
 
@@ -22,9 +22,9 @@ The application fetches data from MySQL database and displays it in a browser.
 
 ## ⚙️ Project Architecture
 
-Flask App (Container)  --->  MySQL (Container)
+Flask App (Container) ---> MySQL (Container)
 
-Both containers are connected using Docker custom network.
+👉 Both containers are connected using a custom Docker network.
 
 ---
 
@@ -32,14 +32,14 @@ Both containers are connected using Docker custom network.
 
 ### 1. Create Network
 ```bash
+# Create a Docker network for container communication
 docker network create twotier
 
+### 2. Run MySQL Container
+```bash
+# Note: If mysql container already running, skip this step
 docker run -d --name mysql \
 --network twotier \
 -e MYSQL_ROOT_PASSWORD=root \
 -e MYSQL_DATABASE=devops \
 mysql
-
-### 3. Build Flask App
-```bash
-docker build -t web-app .
