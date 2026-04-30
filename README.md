@@ -33,3 +33,13 @@ Both containers are connected using Docker custom network.
 ### 1. Create Network
 ```bash
 docker network create twotier
+
+docker run -d --name mysql \
+--network twotier \
+-e MYSQL_ROOT_PASSWORD=root \
+-e MYSQL_DATABASE=devops \
+mysql
+
+### 3. Build Flask App
+```bash
+docker build -t web-app .
